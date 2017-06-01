@@ -1,0 +1,71 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.3.RELEASE'
+    }
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+plugins {
+    id "org.sonarqube" version "2.2.1"
+}
+
+version '0.1'
+
+// plugins needed for development and deployment
+apply plugin: 'java'
+apply plugin: 'war'
+// plugins to support an IDE
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+// plugins to support quality assurance
+apply plugin: 'org.sonarqube'
+apply plugin: 'jacoco'
+apply plugin: 'org.springframework.boot'
+
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+}
+
+if (!project.hasProperty("sonarBranch")) {
+    ext.sonarBranch = "unknown"
+}
+
+dependencies {
+    def log4jVersion = '2.8.1'
+    compile "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    compile "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.apache.commons:commons-lang3:3.5')
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile version: '4.12', group: 'junit', name: 'junit'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+    distributionUrl = "http://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
+
+sonarqube {
+    properties {
+        property "sonar.host.url", " http://jenkins.iue.fh-kiel.de/sonar"
+        property "sonar.branch", sonarBranch
+        property "sonar.login", "jenkins"
+        property "sonar.password", "jenkins"
+        property "sonar.skipDesign", "true"
+        property "sonar.analysis.mode", "publish"
+        property "sonar.sourceEncoding", "UTF-8"
+    }
+}
